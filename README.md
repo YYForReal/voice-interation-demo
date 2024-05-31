@@ -12,6 +12,8 @@ project_folder/
 ├── chat.py                   # 包含 spark_completion 函数的文件
 ├── voice_service.py          # 声音服务类文件，包含 Voice 抽象类和 PyttsVoice 实现类
 ├── requirements.txt          # 项目依赖文件
+├── config.json               # 配置文件，包含敏感信息，不应提交到版本控制系统
+├── .gitignore                # Git 忽略文件，包含 config.json
 ├── static/
 │   └── index.html            # 前端 HTML 文件
 └── uploads/                  # 上传的音频文件存储目录
@@ -22,7 +24,7 @@ project_folder/
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/yourusername/voice-interaction-demo.git
+git clone https://github.com/YYForReal/voice-interaction-demo.git
 cd voice-interaction-demo
 ```
 
@@ -39,7 +41,21 @@ source venv/bin/activate  # 对于 Windows 使用 venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. 安装 FFmpeg
+### 4. 配置星火 API
+
+在项目根目录下创建 `config.json` 文件，并添加以下内容：
+
+```json
+{
+    "SPARKAI_URL": "wss://spark-api.xf-yun.com/v3.5/chat",
+    "SPARKAI_APP_ID": "YOUR_SPARKAI_APP_ID",
+    "SPARKAI_API_SECRET": "YOUR_SPARKAI_API_SECRET",
+    "SPARKAI_API_KEY": "YOUR_SPARKAI_API_KEY",
+    "SPARKAI_DOMAIN": "general"
+}
+```
+
+### 5. 安装 FFmpeg
 
 #### Windows 用户
 
@@ -54,7 +70,7 @@ sudo apt-get update
 sudo apt-get install ffmpeg
 ```
 
-### 5. 验证 FFmpeg 安装
+### 6. 验证 FFmpeg 安装
 
 在命令行中运行以下命令，确保 FFmpeg 已正确安装：
 
