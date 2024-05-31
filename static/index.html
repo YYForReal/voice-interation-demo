@@ -2,7 +2,8 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>语音交互Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语音交互 Demo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,6 +13,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            padding: 0 10px;
         }
         .container {
             background-color: #fff;
@@ -19,7 +21,8 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 300px;
+            width: 100%;
+            max-width: 400px;
         }
         h1 {
             font-size: 24px;
@@ -33,6 +36,8 @@
             margin: 10px;
             border-radius: 5px;
             cursor: pointer;
+            width: 100%;
+            max-width: 200px;
         }
         button:disabled {
             background-color: #cccccc;
@@ -46,7 +51,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>语音交互Demo</h1>
+        <h1>语音交互 Demo</h1>
         <button id="recordBtn">开始录音</button>
         <button id="stopBtn" disabled>停止录音</button>
         <audio id="audioPlayback" controls></audio>
@@ -55,54 +60,112 @@
     </div>
 
     <script>
-        let mediaRecorder;
-        let audioChunks = [];
+        class AudioProcessor {
+            constructor() {
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.stream = null;
+            }
 
-        document.getElementById('recordBtn').addEventListener('click', () => {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
+            async init() {
+                console.log('Checking for mediaDevices and getUserMedia support...');
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.error('navigator.mediaDevices or navigator.mediaDevices.getUserMedia not supported.');
+                    alert('你的浏览器不支持麦克风访问，请使用支持的浏览器，如最新版本的 Chrome 或 Firefox。');
+                    return false;
+                }
 
-                    mediaRecorder.addEventListener('dataavailable', event => {
-                        audioChunks.push(event.data);
-                    });
+                try {
+                    console.log('Requesting microphone access...');
+                    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log('Microphone access granted.');
+                    return true;
+                } catch (error) {
+                    console.error('Error accessing the microphone:', error);
+                    alert('无法访问麦克风，请检查权限设置。');
+                    return false;
+                }
+            }
 
-                    mediaRecorder.addEventListener('stop', () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        const audio = document.getElementById('audioPlayback');
-                        audio.src = audioUrl;
+            startRecording() {
+                if (!this.stream) {
+                    alert('麦克风初始化失败，请刷新页面重试。');
+                    return;
+                }
 
-                        const formData = new FormData();
-                        formData.append('audio', audioBlob, 'audio.wav');
+                this.audioChunks = [];
+                this.mediaRecorder = new MediaRecorder(this.stream);
+                this.mediaRecorder.start();
 
-                        fetch('/process_audio', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            document.getElementById('transcript').innerText = `你说: ${data.transcript}`;
-                            document.getElementById('response').innerText = `机器人回复: ${data.reply}`;
-                            const audioBuffer = new Uint8Array(data.audio.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-                            const audioBlob = new Blob([audioBuffer], { type: 'audio/wav' });
-                            const replyUrl = URL.createObjectURL(audioBlob);
-                            audio.src = replyUrl;
-                            audio.play();
-                        })
-                        .catch(error => console.error('Error:', error));
-                    });
-
-                    document.getElementById('stopBtn').disabled = false;
-                    document.getElementById('recordBtn').disabled = true;
+                this.mediaRecorder.addEventListener('dataavailable', event => {
+                    this.audioChunks.push(event.data);
                 });
-        });
+            }
 
-        document.getElementById('stopBtn').addEventListener('click', () => {
-            mediaRecorder.stop();
-            document.getElementById('stopBtn').disabled = true;
-            document.getElementById('recordBtn').disabled = false;
+            stopRecording() {
+                return new Promise(resolve => {
+                    this.mediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        console.log('Recording stopped, audio blob created:', audioBlob);
+                        resolve(audioBlob);
+                    });
+
+                    this.mediaRecorder.stop();
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const audioProcessor = new AudioProcessor();
+            const isInitialized = await audioProcessor.init();
+
+            if (!isInitialized) {
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = true;
+                return;
+            }
+
+            document.getElementById('recordBtn').addEventListener('click', () => {
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('recordBtn').disabled = true;
+                audioProcessor.startRecording();
+            });
+
+            document.getElementById('stopBtn').addEventListener('click', async () => {
+                const audioBlob = await audioProcessor.stopRecording();
+                if (!audioBlob) {
+                    console.error('Failed to create audio blob.');
+                    alert('录音失败，请重试。');
+                    return;
+                }
+
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('recordBtn').disabled = false;
+
+                console.log('Audio blob:', audioBlob);
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = document.getElementById('audioPlayback');
+                audio.src = audioUrl;
+
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'audio.wav');
+
+                fetch('/process_audio', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('transcript').innerText = `你说: ${data.transcript}`;
+                    document.getElementById('response').innerText = `机器人回复: ${data.reply}`;
+                    const audioBuffer = new Uint8Array(data.audio.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                    const replyBlob = new Blob([audioBuffer], { type: 'audio/wav' });
+                    const replyUrl = URL.createObjectURL(replyBlob);
+                    audio.src = replyUrl;
+                    audio.play();
+                })
+                .catch(error => console.error('Error:', error));
+            });
         });
     </script>
 </body>

@@ -2,20 +2,23 @@ import requests
 import json
 from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
 from sparkai.core.messages import ChatMessage
-# pip install --upgrade spark_ai_python
+
+#
 
 # 读取配置文件
-with open('config.json', 'r') as f:
+with open("config.json", "r") as f:
     config = json.load(f)
 
+
 def spark_completion(messages):
-    print("spark_completion")
+    print("spark_completion", messages)
     # 读取配置项
     SPARKAI_URL = config["SPARKAI_URL"]
     SPARKAI_APP_ID = config["SPARKAI_APP_ID"]
     SPARKAI_API_SECRET = config["SPARKAI_API_SECRET"]
     SPARKAI_API_KEY = config["SPARKAI_API_KEY"]
     SPARKAI_DOMAIN = config["SPARKAI_DOMAIN"]
+    print("spark_completion", SPARKAI_URL)
 
     spark = ChatSparkLLM(
         spark_api_url=SPARKAI_URL,

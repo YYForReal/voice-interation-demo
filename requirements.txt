@@ -4,3 +4,4 @@ whisper
 gtts
 torch
 pyttsx3
+flask-cors
