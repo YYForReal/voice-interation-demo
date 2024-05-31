@@ -39,6 +39,7 @@ source venv/bin/activate  # 对于 Windows 使用 venv\Scripts\activate
 
 ```bash
 pip install -r requirements.txt
+pip install --upgrade spark_ai_python
 ```
 
 ### 4. 配置星火 API
@@ -68,6 +69,8 @@ pip install -r requirements.txt
 ```bash
 sudo apt-get update
 sudo apt-get install ffmpeg
+pip install --upgrade openai-whisper
+
 ```
 
 ### 6. 验证 FFmpeg 安装

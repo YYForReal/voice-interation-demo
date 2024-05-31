@@ -2,11 +2,13 @@ import requests
 import json
 from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
 from sparkai.core.messages import ChatMessage
-# pip install --upgrade spark_ai_python
+
+#
 
 # 读取配置文件
-with open('config.json', 'r') as f:
+with open("config.json", "r") as f:
     config = json.load(f)
+
 
 def spark_completion(messages):
     print("spark_completion")

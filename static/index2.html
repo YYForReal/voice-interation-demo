@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>麦克风测试页面</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+  }
+
+  #volume-level {
+    height: 20px;
+    width: 80%;
+    margin: 20px auto;
+    background-color: #ddd;
+    position: relative;
+  }
+
+  #volume-fill {
+    height: 100%;
+    width: 0;
+    background-color: #009688;
+    position: absolute;
+  }
+
+  button {
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>麦克风测试</h1>
+
+<div id="volume-level">
+  <div id="volume-fill"></div>
+</div>
+
+<button id="start">开始测试</button>
+<button id="stop" disabled>停止测试</button>
+
+<script>
+  'use strict';
+
+  const startButton = document.getElementById('start');
+  const stopButton = document.getElementById('stop');
+  const volumeFill = document.getElementById('volume-fill');
+  let audioContext;
+  let analyser;
+  let microphoneStream;
+
+  // 获取麦克风权限并开始分析音频流
+  function startMicrophone() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          microphoneStream = stream;
+          audioContext = new AudioContext();
+          analyser = audioContext.createAnalyser();
+          const source = audioContext.createMediaStreamSource(stream);
+          source.connect(analyser);
+          visualizeVolume();
+          startButton.disabled = true;
+          stopButton.disabled = false;
+        })
+        .catch(error => {
+          console.error('获取麦克风权限失败：', error);
+        });
+    } else {
+      alert('您的浏览器不支持访问麦克风。');
+    }
+  }
+
+  // 停止分析音频流并关闭麦克风
+  function stopMicrophone() {
+    microphoneStream.getTracks().forEach(track => track.stop());
+    startButton.disabled = false;
+    stopButton.disabled = true;
+  }
+
+  // 可视化麦克风音量
+  function visualizeVolume() {
+    const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+    requestAnimationFrame(visualizeVolume);
+
+    analyser.getByteFrequencyData(frequencyData);
+    const volume = frequencyData.reduce((acc, val) => acc + val, 0) / frequencyData.length;
+    volumeFill.style.width = (volume / 255 * 100) + '%';
+  }
+
+  // 为按钮添加事件监听器
+  startButton.addEventListener('click', startMicrophone);
+  stopButton.addEventListener('click', stopMicrophone);
+</script>
+
+</body>
+</html>
