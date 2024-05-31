@@ -1,0 +1,6 @@
+Flask
+pydub
+whisper
+gtts
+torch
+pyttsx3
