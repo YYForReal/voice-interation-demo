@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>语音交互Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        audio {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>语音交互Demo</h1>
+        <button id="recordBtn">开始录音</button>
+        <button id="stopBtn" disabled>停止录音</button>
+        <audio id="audioPlayback" controls></audio>
+        <p id="transcript"></p>
+        <p id="response"></p>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById('recordBtn').addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = document.getElementById('audioPlayback');
+                        audio.src = audioUrl;
+
+                        const formData = new FormData();
+                        formData.append('audio', audioBlob, 'audio.wav');
+
+                        fetch('/process_audio', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('transcript').innerText = `你说: ${data.transcript}`;
+                            document.getElementById('response').innerText = `机器人回复: ${data.reply}`;
+                            const audioBuffer = new Uint8Array(data.audio.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                            const audioBlob = new Blob([audioBuffer], { type: 'audio/wav' });
+                            const replyUrl = URL.createObjectURL(audioBlob);
+                            audio.src = replyUrl;
+                            audio.play();
+                        })
+                        .catch(error => console.error('Error:', error));
+                    });
+
+                    document.getElementById('stopBtn').disabled = false;
+                    document.getElementById('recordBtn').disabled = true;
+                });
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            mediaRecorder.stop();
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('recordBtn').disabled = false;
+        });
+    </script>
+</body>
+</html>
