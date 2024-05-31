@@ -11,13 +11,14 @@ with open("config.json", "r") as f:
 
 
 def spark_completion(messages):
-    print("spark_completion")
+    print("spark_completion", messages)
     # 读取配置项
     SPARKAI_URL = config["SPARKAI_URL"]
     SPARKAI_APP_ID = config["SPARKAI_APP_ID"]
     SPARKAI_API_SECRET = config["SPARKAI_API_SECRET"]
     SPARKAI_API_KEY = config["SPARKAI_API_KEY"]
     SPARKAI_DOMAIN = config["SPARKAI_DOMAIN"]
+    print("spark_completion", SPARKAI_URL)
 
     spark = ChatSparkLLM(
         spark_api_url=SPARKAI_URL,

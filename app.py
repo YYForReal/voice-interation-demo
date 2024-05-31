@@ -9,7 +9,7 @@ from chat import spark_completion
 app = Flask(__name__, static_folder="static")
 CORS(app)  # 允许跨域
 
-model = whisper.load_model("base")
+model = whisper.load_model("medium")
 voice_service = PyttsVoice()
 
 

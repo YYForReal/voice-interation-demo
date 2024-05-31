@@ -68,13 +68,17 @@
             }
 
             async init() {
+                console.log('Checking for mediaDevices and getUserMedia support...');
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.error('navigator.mediaDevices or navigator.mediaDevices.getUserMedia not supported.');
                     alert('你的浏览器不支持麦克风访问，请使用支持的浏览器，如最新版本的 Chrome 或 Firefox。');
                     return false;
                 }
 
                 try {
+                    console.log('Requesting microphone access...');
                     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log('Microphone access granted.');
                     return true;
                 } catch (error) {
                     console.error('Error accessing the microphone:', error);
@@ -96,19 +100,18 @@
                 this.mediaRecorder.addEventListener('dataavailable', event => {
                     this.audioChunks.push(event.data);
                 });
-
-                return new Promise(resolve => {
-                    this.mediaRecorder.addEventListener('stop', () => {
-                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-                        resolve(audioBlob);
-                    });
-                });
             }
 
             stopRecording() {
-                if (this.mediaRecorder) {
+                return new Promise(resolve => {
+                    this.mediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        console.log('Recording stopped, audio blob created:', audioBlob);
+                        resolve(audioBlob);
+                    });
+
                     this.mediaRecorder.stop();
-                }
+                });
             }
         }
 
@@ -130,9 +133,16 @@
 
             document.getElementById('stopBtn').addEventListener('click', async () => {
                 const audioBlob = await audioProcessor.stopRecording();
+                if (!audioBlob) {
+                    console.error('Failed to create audio blob.');
+                    alert('录音失败，请重试。');
+                    return;
+                }
+
                 document.getElementById('stopBtn').disabled = true;
                 document.getElementById('recordBtn').disabled = false;
 
+                console.log('Audio blob:', audioBlob);
                 const audioUrl = URL.createObjectURL(audioBlob);
                 const audio = document.getElementById('audioPlayback');
                 audio.src = audioUrl;

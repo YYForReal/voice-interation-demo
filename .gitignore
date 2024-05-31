@@ -163,3 +163,5 @@ cython_debug/
 __pycache__
 *.pyc
 config.json
+tmp/*.wav
+uploads/*.wav
