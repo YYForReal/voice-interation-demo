@@ -1,7 +1,0 @@
-{
-    "SPARKAI_URL": "wss://spark-api.xf-yun.com/v3.5/chat",
-    "SPARKAI_APP_ID": "YOUR_SPARKAI_APP_ID",
-    "SPARKAI_API_SECRET": "YOUR_SPARKAI_API_SECRET",
-    "SPARKAI_API_KEY": "YOUR_SPARKAI_API_KEY",
-    "SPARKAI_DOMAIN": "general"
-}
