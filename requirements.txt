@@ -2,6 +2,19 @@ Flask
 pydub
 whisper
 gtts
-torch
+# torch
 pyttsx3
 flask-cors
+
+
+omegaconf~=2.3.0
+torch~=2.1.0
+
+tqdm
+einops
+vector_quantize_pytorch
+transformers~=4.41.1
+vocos
+IPython
+
+WeTextProcessing

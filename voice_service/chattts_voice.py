@@ -4,7 +4,9 @@ import torch
 import ChatTTS
 import numpy as np
 from scipy.io.wavfile import write as wav_write
-from voice import Voice
+from .voice import Voice
+import torchaudio
+import soundfile
 
 
 class ChatTTSVoice(Voice):
@@ -27,13 +29,18 @@ class ChatTTSVoice(Voice):
             # ChatTTS 的 infer 方法
             wavs = self.chat.infer([text])
             wav_data = wavs[0]
+            print(f"wav_data: {wav_data}")
+            print("ready to write in wav file", wavFile)
 
-            # 将音频数据限制在 float32 的范围内并转换为 int16 格式
-            wav_data_clipped = np.clip(wav_data, -1.0, 1.0)
-            wav_data_int16 = np.int16(wav_data_clipped * 32767)
+            soundfile.write(wavFile, wavs[0][0], 24000)
+            # torchaudio.save(wavFile, torch.from_numpy(wav_data), 24000)
 
-            # 使用 scipy.io.wavfile 写入 WAV 文件
-            wav_write(wavFile, 24000, wav_data_int16)
+            # # 将音频数据限制在 float32 的范围内并转换为 int16 格式
+            # wav_data_clipped = np.clip(wav_data, -1.0, 1.0)
+            # wav_data_int16 = np.int16(wav_data_clipped * 32767)
+
+            # # 使用 scipy.io.wavfile 写入 WAV 文件
+            # wav_write(wavFile, 24000, wav_data_int16)
 
             return wavFile
         except Exception as e:

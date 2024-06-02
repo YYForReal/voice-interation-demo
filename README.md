@@ -52,8 +52,10 @@ pip install --upgrade spark_ai_python
     "SPARKAI_APP_ID": "YOUR_SPARKAI_APP_ID",
     "SPARKAI_API_SECRET": "YOUR_SPARKAI_API_SECRET",
     "SPARKAI_API_KEY": "YOUR_SPARKAI_API_KEY",
-    "SPARKAI_DOMAIN": "general"
+    "SPARKAI_DOMAIN": "general",
+    "TTS_SERVICE": "pytts"  # 可选项：pytts 或 chattts
 }
+
 ```
 
 ### 5. 安装 FFmpeg

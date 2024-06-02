@@ -3,6 +3,7 @@ import sys
 import time
 import pyttsx3
 from pydub import AudioSegment
+from .voice import Voice
 
 # Set the path to ffmpeg if it's not found
 if sys.platform == "win32":

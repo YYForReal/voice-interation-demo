@@ -1,16 +1,17 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 import os
 import whisper
 from io import BytesIO
 from flask_cors import CORS
-from voice_service import PyttsVoice
+from voice_service import get_voice_service
 from chat import spark_completion
 
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__)
 CORS(app)  # 允许跨域
 
-model = whisper.load_model("medium")
-voice_service = PyttsVoice()
+# 加载 Whisper 大模型
+model = whisper.load_model("medium")  # large base medium small
+voice_service = get_voice_service()
 
 
 @app.route("/process_audio", methods=["POST"])
@@ -19,17 +20,17 @@ def process_audio():
     audio_path = os.path.join("uploads", "input_audio.wav")
     audio_file.save(audio_path)
 
-    result = model.transcribe(audio_path)
+    result = model.transcribe(audio_path, language="zh")
     user_text = result["text"]
 
     messages = [{"role": "user", "content": user_text}]
     llm_response = spark_completion(messages)
     reply_text = llm_response.generations[0][0].text
 
-    wav_file_path = voice_service.textToVoice(reply_text)
+    tts_path = voice_service.textToVoice(reply_text)
 
-    if wav_file_path:
-        with open(wav_file_path, "rb") as f:
+    if tts_path:
+        with open(tts_path, "rb") as f:
             audio_data = f.read()
         return jsonify(
             {
@@ -40,11 +41,6 @@ def process_audio():
         )
     else:
         return jsonify({"error": "Error generating voice response"}), 500
-
-
-@app.route("/static/<path:path>")
-def send_static(path):
-    return send_from_directory("static", path)
 
 
 if __name__ == "__main__":
