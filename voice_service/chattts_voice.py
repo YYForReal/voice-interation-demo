@@ -1,7 +1,7 @@
 import os
 import time
 import torch
-import ChatTTS
+from .ChatTTS import Chat
 import numpy as np
 from scipy.io.wavfile import write as wav_write
 from .voice import Voice
@@ -11,7 +11,7 @@ import soundfile
 
 class ChatTTSVoice(Voice):
     def __init__(self):
-        self.chat = ChatTTS.Chat()
+        self.chat = Chat()
         self.chat.load_models(compile=False)
 
     def textToVoice(self, text):

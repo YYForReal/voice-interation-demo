@@ -1,0 +1,8 @@
+{
+    "SPARKAI_URL": "wss://spark-api.xf-yun.com/v1.1/chat",
+    "SPARKAI_APP_ID": "ae7647b4",
+    "SPARKAI_API_SECRET": "YzlmMmIzMjkxNjcxY2ZkYWJkMzU3NjJm",
+    "SPARKAI_API_KEY": "f6c38ce232702c62a3e678276b2a385f",
+    "SPARKAI_DOMAIN": "general",
+    "TTS_SERVICE": "chattts"  // pytts
+}

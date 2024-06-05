@@ -95,6 +95,11 @@ python app.py
 
 在浏览器中打开 [http://127.0.0.1:5000/static/index.html](http://127.0.0.1:5000/static/index.html)。
 
+without https , could not require  voice
+so using ngrok to require https
+
+https://dashboard.ngrok.com/get-started/setup/linux
+
 ## 代码说明
 
 ### app.py

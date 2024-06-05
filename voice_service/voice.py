@@ -22,11 +22,11 @@ def get_voice_service():
             config = json.load(f)
             tts_service = config.get("TTS_SERVICE", "pytts")
             if tts_service == "chattts":
-                from .chattts_voice import ChatTTSVoice
+                from voice_service.chattts_voice import ChatTTSVoice
 
                 return ChatTTSVoice()
             else:
-                from .pytts_voice import PyttsVoice
+                from voice_service.pytts_voice import PyttsVoice
 
                 return PyttsVoice()
     except FileNotFoundError:
